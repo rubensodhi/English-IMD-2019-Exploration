@@ -73,16 +73,23 @@ The primary objective of this analysis is to investigate how socio-economic fact
 
 - **Income and Employment Scores** strongly correlate with Health Deprivation Scores.
 - **Correlation Matrix**: High interdependence between `IncScore` and `EmpScore` with weaker correlations for environmental factors.
+- ![image](https://github.com/user-attachments/assets/ade27170-6df4-4250-a16e-906ee63a2a54)
+
 
 ### Maps
 
 1. **Choropleth Map**:
    - Visualizes health deprivation scores across England.
    - Gradient from least deprived (purple) to most deprived (yellow).
+   - ![image](https://github.com/user-attachments/assets/e5cb1c31-330b-4f3c-9c1b-489f2d1bfdc0)
 
-2. **Most and Least Deprived Highlighted**:
-   - Most deprived regions highlighted in **red**.
+
+
+2. **Most and Least Deprived Highlighted - Top 20**:
+   - Most deprived regions highlighted in **dark purple**.
    - Least deprived regions highlighted in **gold**.
+   - ![image](https://github.com/user-attachments/assets/0e38db05-6c10-4120-bf8e-9a96605cac90)
+
 
 ---
 
