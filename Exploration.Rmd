@@ -1,0 +1,348 @@
+---
+title: "Analyzing the Impact of Socio-Economic Factors on Health Deprivation and Disability Deprivation 2019"
+author: "Ruben Singh Sodhi"
+date: "`r Sys.Date()`"
+output:
+  pdf_document: default
+  html_document: default
+---
+
+#Introduction
+Health deprivation and disability are critical indicators of inequality in communities. This analysis leverages the Index of Multiple Deprivation (IMD) 2019 data to examine the relationship between socio-economic factors and health outcomes across England's Lower Layer Super Output Areas (LSOAs).
+
+
+```{r}
+# Loading the dataset
+
+library(foreign)
+
+# Specify the path to your DBF file
+dbf_file_path <- "F:\\documents copy\\DataScience\\English IMD 2019\\English IMD 2019\\IMD_2019.dbf"
+
+# Read the DBF file
+imd_data <- read.dbf(dbf_file_path)
+
+# Print the first few rows of the data
+head(df)
+
+# Checking for missing values
+missing_values <- sapply(imd_data, function(x) sum(is.na(x)))
+
+missing_values
+```
+
+
+```{r}
+# Load required libraries
+library(ggplot2)
+library(dplyr)
+library(bestNormalize) # for Yeo-Johnson transformation
+library(e1071)
+
+
+# Selecting relevant score columns for analysis
+relevant_data <- imd_data %>% select(EnvScore, CriScore, IncScore, EmpScore, EduScore, HDDScore)
+
+par(mfrow = c(2,3)) # setting layout for multiple plots
+hist(relevant_data$EnvScore, main = "Environment Score", xlab = "Environment Score", breaks = 30)
+hist(relevant_data$CriScore, main = "Crime Score", xlab = "Crime Score", breaks = 30)
+hist(relevant_data$IncScore, main = "Income Score", xlab = "Income Score", breaks = 30)
+hist(relevant_data$EmpScore, main = "Employment Score", xlab = "Employment Score", breaks = 30)
+hist(relevant_data$EduScore, main = "Education Score", xlab = "Education Score", breaks = 30)
+hist(relevant_data$HDDScore, main = "Health Deprivation and Disability Score", xlab = "HDD Score", breaks = 30)
+
+# Checking for outliers with boxplots
+par(mfrow = c(2,3)) # setting layout for multiple plots
+boxplot(relevant_data$EnvScore, main = "Environment Score")
+boxplot(relevant_data$CriScore, main = "Crime Score")
+boxplot(relevant_data$IncScore, main = "Income Score")
+boxplot(relevant_data$EmpScore, main = "Employment Score")
+boxplot(relevant_data$EduScore, main = "Education Score")
+boxplot(relevant_data$HDDScore, main = "Health Deprivation and Disability Score")
+
+
+# Applying the Yeo-Johnson transformation
+transformed_data <- relevant_data
+transformed_data$CriScore <- yeojohnson(relevant_data$CriScore)$x.t
+transformed_data$EnvScore <- yeojohnson(relevant_data$EnvScore)$x.t
+transformed_data$IncScore <- yeojohnson(relevant_data$IncScore)$x.t
+transformed_data$EmpScore <- yeojohnson(relevant_data$EmpScore)$x.t
+transformed_data$EduScore <- yeojohnson(relevant_data$EduScore)$x.t
+transformed_data$HDDScore <- yeojohnson(relevant_data$HDDScore)$x.t
+
+# Checking for outliers with boxplots
+par(mfrow = c(2,3)) # setting layout for multiple plots
+boxplot(transformed_data$EnvScore, main = "Environment Score")
+boxplot(transformed_data$CriScore, main = "Crime Score")
+boxplot(transformed_data$IncScore, main = "Income Score")
+boxplot(transformed_data$EmpScore, main = "Employment Score")
+boxplot(transformed_data$EduScore, main = "Education Score")
+boxplot(transformed_data$HDDScore, main = "Health Deprivation and Disability Score")
+
+# Visualizing the transformed distributions
+par(mfrow = c(2,3)) # setting layout for multiple plots
+hist(transformed_data$EnvScore, main = "Transformed Environment Score", xlab = "Environment Score", breaks = 30)
+hist(transformed_data$CriScore, main = "Transformed Crime Score", xlab = "Crime Score", breaks = 30)
+hist(transformed_data$IncScore, main = "Transformed Income Score", xlab = "Income Score", breaks = 30)
+hist(transformed_data$EmpScore, main = "Transformed Employment Score", xlab = "Employment Score", breaks = 30)
+hist(transformed_data$EduScore, main = "Transformed Education Score", xlab = "Education Score", breaks = 30)
+hist(transformed_data$HDDScore, main = "Transformed Health Deprivation and Disability Score", xlab = "HDD Score", breaks = 30)
+
+# Standardizing the transformed data
+standardized_data <- scale(transformed_data)
+
+# Viewing the first few rows of the standardized data
+head(standardized_data)
+
+# Converting the standardized data back into a data frame
+standardized_data_df <- as.data.frame(standardized_data)
+
+# Calculating skewness for the original data
+original_skewness <- sapply(relevant_data, skewness)
+
+# Calculating skewness for the transformed data
+transformed_skewness <- sapply(transformed_data, skewness)
+
+# Displaying the skewness results
+print("Original Data Skewness")
+print(original_skewness)
+print("Transformed Data Skewness")
+print(transformed_skewness)
+```
+
+```{r}
+library(corrplot)
+# Assuming transformed_data is your Yeo-Johnson transformed dataframe
+
+# Correlation Analysis using Pearson's method
+correlation_matrix <- cor(transformed_data, method = "pearson")
+
+# Displaying the correlation matrix
+print(correlation_matrix)
+
+# Advanced Visualization of the Correlation Matrix
+corrplot(correlation_matrix, method = "color", 
+         type = "upper", # Display only the upper half of the matrix
+         order = "hclust", # Hierarchical clustering to group similar variables
+         tl.col = "black", # Color for text labels
+         tl.srt = 45, # Text label rotation
+         addCoef.col = "black", # Color for correlation coefficients
+         number.cex = .7, # Size of the correlation coefficients
+         col = colorRampPalette(c("#6D9EC1", "white", "#E46726"))(200)) # Custom color palette
+```
+
+```{r}
+# Load necessary library
+library(lmtest)
+
+# Linear regression models
+model_env_hdd <- lm(HDDScore ~ EnvScore, data = standardized_data_df)
+model_cri_hdd <- lm(HDDScore ~ CriScore, data = standardized_data_df)
+model_inc_hdd <- lm(HDDScore ~ IncScore, data = standardized_data_df)
+model_emp_hdd <- lm(HDDScore ~ EmpScore, data = standardized_data_df)
+model_edu_hdd <- lm(HDDScore ~ EduScore, data = standardized_data_df)
+
+# Summary of the models
+summary(model_env_hdd)
+summary(model_cri_hdd)
+summary(model_inc_hdd)
+summary(model_emp_hdd)
+summary(model_edu_hdd)
+
+# Additional: To get p-values and confidence intervals
+coeftest(model_env_hdd)
+confint(model_env_hdd)
+coeftest(model_cri_hdd)
+confint(model_cri_hdd)
+coeftest(model_inc_hdd)
+confint(model_inc_hdd)
+coeftest(model_emp_hdd)
+confint(model_emp_hdd)
+coeftest(model_edu_hdd)
+confint(model_edu_hdd)
+
+```
+
+```{r}
+# Load necessary library
+library(lmtest)
+
+
+# Multivariate Linear Regression Analysis
+# Model with IncScore, EmpScore, and EduScore as independent variables
+model_multi <- lm(HDDScore ~ IncScore + EmpScore + EduScore + CriScore + EnvScore, data = standardized_data_df)
+
+# Summary of the multivariate model
+summary(model_multi)
+
+# Additional: To get p-values and confidence intervals
+coeftest(model_multi)
+confint(model_multi)
+```
+
+
+```{r}
+#Spatial Data Analysis
+
+library(sf)
+library(ggplot2)
+library(dplyr)
+
+
+# Loading the shapefile
+shapefile_path <- "F:\\documents copy\\DataScience\\English IMD 2019\\English IMD 2019\\IMD_2019.shp"
+gdf <- st_read(shapefile_path)
+
+# Merging the HDDScore data with the shapefile data
+gdf_merged <- merge(gdf, imd_data, by = "lsoa11cd")
+
+
+library(sf)
+library(ggplot2)
+
+# Assuming 'gdf_merged' is your merged GeoDataFrame with HDDScore data
+# Make sure to replace 'HDDScore' with the actual column name for the HDDScore in your dataset
+
+# Creating a choropleth map
+ggplot(data = gdf_merged) +
+  geom_sf(aes(fill = HDDScore.x), color = NA) +  # Replace HDDScore with the correct column name
+  scale_fill_viridis_c(option = "D") +  # Color scale, can be adjusted as needed
+  labs(title = "Choropleth Map of Health Deprivation and Disability Scores (2019)",
+       fill = "HDDScore") +
+  theme_minimal()
+
+```
+
+```{r}
+# Assuming 'gdf_merged' is your merged GeoDataFrame with HDDScore data in R
+
+# Sorting the data by HDDRank
+sorted_gdf <- imd_data %>% arrange(HDDRank)
+
+# Identifying the most and least deprived regions
+most_deprived_regions <- head(sorted_gdf, 5)
+least_deprived_regions <- tail(sorted_gdf, 5)
+
+# Extracting relevant information
+most_deprived_info <- most_deprived_regions %>% select(lsoa11cd, lsoa11nm, HDDScore, HDDRank)
+least_deprived_info <- least_deprived_regions %>% select(lsoa11cd, lsoa11nm, HDDScore, HDDRank)
+
+# Displaying the information
+print(most_deprived_info)
+print(least_deprived_info)
+
+
+
+
+
+```
+
+```{r}
+
+# Sorting the data by HDDRank
+sorted_gdf <- gdf_merged %>% arrange(HDDRank.x)
+
+# Identifying the most and least deprived regions
+most_deprived_regions <- head(sorted_gdf, 5)
+least_deprived_regions <- tail(sorted_gdf, 5)
+
+# Creating the base choropleth map
+base_map <- ggplot(data = gdf_merged) +
+  geom_sf(aes(fill = HDDScore.x), color = NA) +  # Replace HDDScore with the actual column name
+  scale_fill_viridis_c(option = "D") +  # Color scale
+  labs(title = "Choropleth Map with Most and Least Deprived Regions Highlighted",
+       fill = "HDDScore") +
+  theme_minimal()
+
+# Adding layers for most and least deprived regions
+final_map <- base_map +
+  geom_sf(data = most_deprived_regions, fill = "red", color = NA) +
+  geom_sf(data = least_deprived_regions, fill = "green", color = NA)
+
+# Display the map
+print(final_map)
+
+# Creating the map with only the most and least deprived regions
+highlight_map <- ggplot() +
+  geom_sf(data = most_deprived_regions, fill = "red") +
+  geom_sf(data = least_deprived_regions, fill = "green") +
+  labs(title = "Most and Least Deprived Regions Highlighted",
+       fill = "Region Type") +
+  theme_minimal()
+
+# Display the map
+print(highlight_map)
+```
+
+```{r}
+# Load necessary libraries
+library(dplyr)
+library(sf)
+library(stringr)
+library(ggplot2)
+
+
+# 'lsoa11nm.x' (LSOA names) and 'HDDScore.x' (HDD score)
+
+# Extract the prefix of the LSOA names (first part before the 4-digit code)
+gdf_merged <- gdf_merged %>%
+  mutate(LSOA_prefix = str_sub(lsoa11nm.x, 1, nchar(lsoa11nm.x) - 4))  # Get prefix by removing last 4 characters
+
+# Group the data by LSOA prefix and calculate the mean HDDScore for each group
+grouped_data <- gdf_merged %>%
+  group_by(LSOA_prefix) %>%
+  summarise(mean_HDDScore = mean(HDDScore.x, na.rm = TRUE))  # Replace 'HDDScore.x' with your actual column name
+
+# Sort the groups by mean HDDScore
+sorted_groups <- grouped_data %>% arrange(mean_HDDScore)
+
+# Identify the top 20 and bottom 20 groups based on mean HDDScore
+most_deprived_groups <- head(sorted_groups, 20)
+least_deprived_groups <- tail(sorted_groups, 20)
+
+# Print the tables for the top 5 and bottom 5 groups
+print("Top 20 Most Deprived Groups:")
+print(most_deprived_groups)
+
+print("Bottom 20 Least Deprived Groups:")
+print(least_deprived_groups)
+
+# Join the grouped data back with the original spatial data to get the mean HDDScore in the spatial dataset
+gdf_merged_with_group <- st_join(gdf_merged, grouped_data, by = "LSOA_prefix")
+
+# Create the base choropleth map, coloring by mean HDDScore
+base_map <- ggplot(data = gdf_merged_with_group) +
+  geom_sf(aes(fill = mean_HDDScore), color = NA) +  # Color regions by mean HDDScore
+  scale_fill_viridis_c(option = "D") +  # Use a color scale
+  labs(title = "Choropleth Map with Most and Least Deprived Groups Highlighted",
+       fill = "Mean HDDScore") +
+  theme_minimal()
+
+# Highlight the top 5 and bottom 5 groups by their prefixes
+final_map <- base_map +
+  geom_sf(data = gdf_merged_with_group %>% filter(LSOA_prefix.y %in% most_deprived_groups$LSOA_prefix),
+          fill = "#6A0DAD", color = NA) +
+  geom_sf(data = gdf_merged_with_group %>% filter(LSOA_prefix.y %in% least_deprived_groups$LSOA_prefix),
+          fill = "#FFD700", color = NA)
+
+# Display the final map
+print(final_map)
+
+# Optionally, create a map showing only the top 5 and bottom 5 groups
+highlight_map <- ggplot() +
+  geom_sf(data = gdf_merged_with_group %>% filter(LSOA_prefix.y %in% most_deprived_groups$LSOA_prefix),
+          fill = "#6A0DAD", color = NA) +
+  geom_sf(data = gdf_merged_with_group %>% filter(LSOA_prefix.y %in% least_deprived_groups$LSOA_prefix),
+          fill = "#FFD700", color = NA) +
+  labs(title = "Most and Least Deprived Groups Highlighted") +
+  theme_minimal()
+
+# Display the highlight map
+print(highlight_map)
+
+
+```
+
+
+
+
