@@ -88,7 +88,8 @@ The primary objective of this analysis is to investigate how socio-economic fact
 2. **Most and Least Deprived Highlighted - Top 20**:
    - Most deprived regions highlighted in **dark purple**.
    - Least deprived regions highlighted in **gold**.
-   - ![image](https://github.com/user-attachments/assets/0e38db05-6c10-4120-bf8e-9a96605cac90)
+   - ![image](https://github.com/user-attachments/assets/ade2d8a9-5b5d-47ee-b054-86ea0139f2c7)
+
 
 
 ---
