@@ -75,6 +75,40 @@ The primary objective of this analysis is to investigate how socio-economic fact
 - **Correlation Matrix**: High interdependence between `IncScore` and `EmpScore` with weaker correlations for environmental factors.
 - ![image](https://github.com/user-attachments/assets/ade27170-6df4-4250-a16e-906ee63a2a54)
 
+###Key Insights from Regression Analysis
+The table below summarizes the results of the individual regression analyses conducted to evaluate the relationship between socio-economic variables and the Health Deprivation and Disability Score (HDDScore):
+![image](https://github.com/user-attachments/assets/8a6658e4-ea1b-432c-afb7-12d57a44d352)
+###Interpretation of Results
+- Employment Score: The strongest predictor of HDDScore with an R-squared value of 0.7369. Suggests that 73.69% of the variability in HDDScore is explained by Employment Deprivation. Coefficient (0.8584) indicates a strong positive relationship: as employment deprivation increases, health deprivation worsens.
+- Income Score: The second strongest predictor (R-squared: 0.6599). Highlights the critical role of income deprivation in health outcomes.
+- Education Score: Significant contributor to HDDScore (R-squared: 0.5395). Indicates areas with lower education levels face worse health deprivation.
+- Crime Score: Moderate influence (R-squared: 0.3462). Suggests areas with higher crime rates tend to have increased health deprivation.
+- Environment Score: Weakest predictor (R-squared: 0.02712). Indicates that environmental factors have a limited direct impact on health deprivation in this analysis.
+###Conclusions from Regression Analysis 
+- Socio-economic factors, particularly income, employment, and education, are the most significant predictors of health deprivation.
+- Crime and environmental factors show weaker associations but remain statistically significant.
+- Addressing economic and educational disparities could have the greatest impact on reducing health inequalities.
+
+###Multivariate Regression Analysis
+This section presents the results of the multivariate regression model, which evaluates the combined effects of multiple socio-economic factors on the Health Deprivation and Disability Score (HDDScore).
+![image](https://github.com/user-attachments/assets/1081a913-ebf3-423e-b0c3-6f3cfddf2749)
+
+####Key Findings
+-Income: The coefficient (-0.2369) indicates that higher income reduces health deprivation. The 95% confidence interval (-0.2566, -0.2172) confirms the precision of the estimate.
+-Employment: Strongest predictor with a coefficient of 0.8985. Highlights that employment deprivation contributes significantly to health deprivation, as reflected by its high t-value (95.602) and tight confidence interval.
+-Education: Coefficient (0.1425) shows that lower education levels are associated with higher health deprivation. Statistically significant with a p-value of <2e-16.
+-Crime: Coefficient (0.1022) suggests that areas with higher crime rates experience worse health deprivation.
+-Environment: Weakest predictor, with a coefficient of 0.0460. Indicates a minimal but statistically significant impact on health deprivation.
+
+###Interpretation
+- Employment deprivation remains the most critical factor, even after accounting for other variables.
+- Income and education play significant roles in explaining variations in health outcomes, emphasizing the importance of economic and educational interventions.
+- Crime and environment contribute less but still affect health deprivation, warranting consideration in comprehensive health improvement strategies.
+###Conclusion
+The multivariate regression model accounts for the combined influence of socio-economic factors, providing a comprehensive understanding of their relationships with health deprivation. 
+These findings highlight: 
+-The importance of addressing employment and income disparities. 
+-The need to consider education and community factors in policy-making.
 
 ### Maps
 
